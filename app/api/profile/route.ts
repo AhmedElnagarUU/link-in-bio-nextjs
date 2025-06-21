@@ -1,8 +1,10 @@
 import { NextResponse } from 'next/server';
-import clientPromise from '@/lib/mongodb';
+import connectDB from '@/lib/mongoose';
+import User, { IUser } from '../../model/User';
+import UserProfile, { IUserProfile } from '../../model/UserProfile';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '@/api/auth/[...nextauth]/route'
-import { ObjectId } from 'mongodb';
+import { authOptions } from '@/api/auth/[...nextauth]/route';
+import mongoose from 'mongoose';
 
 export async function POST(request: Request) {
   try {
@@ -12,13 +14,12 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const userId = new ObjectId((session.user).id);
+    const userId = new mongoose.Types.ObjectId((session.user).id);
 
-    const client = await clientPromise;
-    const db = client.db("linkinbio");
+    await connectDB();
 
     // Verify user exists
-    const user = await db.collection("users").findOne({ _id: userId });
+    const user = await User.findById(userId).exec() as IUser | null;
 
     if (!user) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
@@ -27,7 +28,7 @@ export async function POST(request: Request) {
     const body = await request.json();
 
     // Update or create profile
-    const result = await db.collection("profiles").updateOne(
+    const result = await UserProfile.findOneAndUpdate(
       { userId: userId },
       {
         $set: {
@@ -36,8 +37,8 @@ export async function POST(request: Request) {
           updatedAt: new Date()
         },
       },
-      { upsert: true }
-    );
+      { upsert: true, new: true }
+    ).exec();
 
     return NextResponse.json({ message: 'Profile saved successfully', result });
   } catch (error) {
@@ -54,20 +55,19 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const userId = new ObjectId((session.user).id);
+    const userId = new mongoose.Types.ObjectId((session.user).id);
 
-    const client = await clientPromise;
-    const db = client.db("linkinbio");
+    await connectDB();
 
     // Get user data
-    const user = await db.collection("users").findOne({ _id: userId });
+    const user = await User.findById(userId).exec() as IUser | null;
 
     if (!user) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
     // Get profile data
-    const profile = await db.collection("profiles").findOne({ userId: userId });
+    const profile = await UserProfile.findOne({ userId: userId }).exec() as IUserProfile | null;
 
     if (!profile) {
       return NextResponse.json(null, { status: 200 });

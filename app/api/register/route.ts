@@ -1,19 +1,31 @@
 import { NextResponse } from 'next/server';
-import clientPromise from '@/lib/mongodb';
+import connectDB from '@/lib/mongoose';
+import User from '../../model/User';
 import bcrypt from 'bcrypt';
 
 export async function POST(request: Request) {
   try {
     const { email, password, name } = await request.json();
     const hashedPassword = await bcrypt.hash(password, 10);
-    const client = await clientPromise;
-    const db = client.db("linkinbio");
-    const result = await db.collection("users").insertOne({
+    
+    await connectDB();
+    
+    // Create username from name
+    const username = name.toLowerCase().replace(/\s/g, '');
+    
+    const user = new User({
       email,
       password: hashedPassword,
       name,
+      username,
     });
-    return NextResponse.json(result);
+    
+    const result = await user.save();
+    
+    return NextResponse.json({ 
+      message: 'User created successfully',
+      userId: result._id 
+    });
   } catch (e) {
     console.error(e);
     return NextResponse.json({ error: 'Error creating user' }, { status: 500 });

@@ -1,8 +1,10 @@
 import { NextResponse } from 'next/server';
-import clientPromise from '@/lib/mongodb';
+import connectDB from '@/lib/mongoose';
+import User, { IUser } from '../../../model/User';
+import UserProfile, { IUserProfile } from '../../../model/UserProfile';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '@/api/auth/[...nextauth]/route'
-import { ObjectId } from 'mongodb';
+import { authOptions } from '@/api/auth/[...nextauth]/route';
+import mongoose from 'mongoose';
 
 // GET profile by user ID
 export async function GET(
@@ -24,20 +26,19 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized access to profile' }, { status: 403 });
     }
 
-    const userId = new ObjectId(sessionUserId);
+    const userId = new mongoose.Types.ObjectId(sessionUserId);
 
-    const client = await clientPromise;
-    const db = client.db("linkinbio");
+    await connectDB();
 
     // Get user data
-    const user = await db.collection("users").findOne({ _id: userId });
+    const user = await User.findById(userId).exec() as IUser | null;
 
     if (!user) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
     // Get profile data
-    const profile = await db.collection("profiles").findOne({ userId: userId });
+    const profile = await UserProfile.findOne({ userId: userId }).exec() as IUserProfile | null;
 
     if (!profile) {
       return NextResponse.json(null, { status: 200 });
@@ -69,13 +70,12 @@ export async function POST(
       return NextResponse.json({ error: 'Unauthorized access to profile' }, { status: 403 });
     }
 
-    const userId = new ObjectId(sessionUserId);
+    const userId = new mongoose.Types.ObjectId(sessionUserId);
 
-    const client = await clientPromise;
-    const db = client.db("linkinbio");
+    await connectDB();
 
     // Verify user exists
-    const user = await db.collection("users").findOne({ _id: userId });
+    const user = await User.findById(userId).exec() as IUser | null;
 
     if (!user) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
@@ -88,7 +88,7 @@ export async function POST(
     console.log("Links data:", body.links);
 
     // Update or create profile
-    const result = await db.collection("profiles").updateOne(
+    const result = await UserProfile.findOneAndUpdate(
       { userId: userId },
       {
         $set: {
@@ -97,11 +97,11 @@ export async function POST(
           updatedAt: new Date()
         },
       },
-      { upsert: true }
-    );
+      { upsert: true, new: true }
+    ).exec();
 
     // Verify the update was successful
-    const updatedProfile = await db.collection("profiles").findOne({ userId: userId });
+    const updatedProfile = await UserProfile.findOne({ userId: userId }).exec() as IUserProfile | null;
     console.log("Updated profile:", updatedProfile);
     console.log("Updated links:", updatedProfile?.links);
 

@@ -1,21 +1,30 @@
 import { NextResponse } from 'next/server';
-import clientPromise from '@/lib/mongodb';
-import { ObjectId } from 'mongodb';
+import connectDB from '@/lib/mongoose';
+import User, { IUser } from '../../model/User';
+import UserProfile from '../../model/UserProfile';
 
 export async function POST(request: Request) {
   try {
-    const { profileId } = await request.json();
-    if (!profileId) {
-      return NextResponse.json({ error: 'Profile ID is required' }, { status: 400 });
+    const { username } = await request.json();
+    if (!username) {
+      return NextResponse.json({ error: 'Username is required' }, { status: 400 });
     }
 
-    const client = await clientPromise;
-    const db = client.db("linkinbio");
+    await connectDB();
     
-    const result = await db.collection("profiles").updateOne(
-      { _id: new ObjectId(profileId) },
-      { $inc: { views: 1 } }
-    );
+    // Get user by username
+    const user = await User.findOne({ username }).exec() as IUser | null;
+    
+    if (!user) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+    }
+    
+    // Update profile views
+    const result = await UserProfile.findOneAndUpdate(
+      { userId: user._id },
+      { $inc: { views: 1 } },
+      { new: true }
+    ).exec();
 
     return NextResponse.json({ success: true, result });
   } catch (e) {

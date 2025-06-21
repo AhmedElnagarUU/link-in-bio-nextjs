@@ -1,4 +1,3 @@
-
 "use client";
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
@@ -14,6 +13,7 @@ interface UserProfile {
   bio: string;
   socials: SocialLink[];
   links: LinkType[];
+  views: number;
 }
 
 // Function to get the appropriate icon for a social platform
@@ -33,25 +33,37 @@ const getSocialIcon = (iconName: string) => {
 
 const ViewProfilePage = ({ params }: { params: { id: string } }) => {
   const [user, setUser] = useState<UserProfile | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (params.id) {
-      fetch(`/api/profile/${params.id}`)
-        .then(res => res.json())
+      // Treat the id as username for the public API
+      fetch(`/api/profile/public/${params.id}`)
+        .then(res => {
+          if (!res.ok) {
+            throw new Error('Profile not found');
+          }
+          return res.json();
+        })
         .then(data => {
           setUser(data);
+          // Track analytics using username
           fetch('/api/analytics', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ profileId: params.id }),
+            body: JSON.stringify({ username: params.id }),
           });
+        })
+        .catch(err => {
+          setError(err.message);
         });
     }
   }, [params.id]);
 
-  if (!user) return <div>Loading...</div>;
+  if (error) return <div className="min-h-screen flex items-center justify-center">Profile not found</div>;
+  if (!user) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
 
   return (
     <div className="min-h-screen bg-[linear-gradient(135deg,#fff5f0_0%,#ffe8f5_100%)] py-12 px-4 sm:px-6 lg:px-8">

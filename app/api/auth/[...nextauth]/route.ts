@@ -1,12 +1,9 @@
-import NextAuth, { DefaultSession, User as NextAuthUser } from 'next-auth';
+import NextAuth from 'next-auth';
 import { JWT } from 'next-auth/jwt';
 import CredentialsProvider from 'next-auth/providers/credentials';
-import clientPromise from '@/lib/mongodb';
+import connectDB from '@/lib/mongoose';
+import User, { IUser } from '../../../model/User';
 import bcrypt from 'bcrypt';
-
-interface User extends NextAuthUser {
-  id: string;
-}
 
 const authOptions = {
   providers: [
@@ -20,12 +17,16 @@ const authOptions = {
         if (!credentials) {
           return null;
         }
-        const client = await clientPromise;
-        const db = client.db("linkinbio");
-        const user = await db.collection("users").findOne({ email: credentials.email });
+        
+        await connectDB();
+        const user = await User.findOne({ email: credentials.email }).exec() as IUser | null;
 
         if (user && bcrypt.compareSync(credentials.password, user.password)) {
-          return { id: user._id.toString(), name: user.name, email: user.email };
+          return { 
+            id: user._id.toString(), 
+            name: user.name, 
+            email: user.email 
+          };
         } else {
           return null;
         }
@@ -36,14 +37,14 @@ const authOptions = {
     strategy: "jwt" as const,
   },
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user }: { token: JWT; user?: any }) {
       if (user) {
         token.id = user.id;
         token.email = user.email;
       }
       return token;
     },
-    async session({ session, token }) {
+    async session({ session, token }: { session: any; token: JWT }) {
       if (session.user) {
         session.user.id = token.id;
         session.user.email = token.email;

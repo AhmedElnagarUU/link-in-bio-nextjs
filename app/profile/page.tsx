@@ -64,7 +64,8 @@ const UserProfilePage = () => {
         <div className="max-w-sm mx-auto">
           <div className="flex justify-end mb-4 space-x-2">
             <Button onClick={() => {
-              navigator.clipboard.writeText(`${window.location.origin}/view/${(session?.user as { id: string })?.id}`);
+              const username = profileData?.username || (session?.user as { id: string })?.id;
+              navigator.clipboard.writeText(`${window.location.origin}/view/${username}`);
               toast({
                 title: "URL Copied!",
                 description: "Your profile URL has been copied to the clipboard.",
@@ -72,7 +73,7 @@ const UserProfilePage = () => {
             }} className="bg-white/80 text-slate-800 hover:bg-white">
               <Copy className="mr-2 h-4 w-4" /> Copy URL
             </Button>
-            <Link href={`/view/${(session?.user as { id: string })?.id}`}>
+            <Link href={`/view/${profileData?.username || (session?.user as { id: string })?.id}`}>
               <Button className="bg-white/80 text-slate-800 hover:bg-white">
                 <Eye className="mr-2 h-4 w-4" /> View
               </Button>
