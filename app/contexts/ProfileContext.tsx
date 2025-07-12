@@ -32,7 +32,7 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
 
     // Skip fetching if data was recently fetched (within last 5 minutes) and not forced
     const now = Date.now();
-    if (
+    if (  
       !force && 
       profileData && 
       lastFetchTime && 
@@ -45,26 +45,35 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
     try {
       setIsLoading(true);
       setError(null);
-      console.log("Fetching profile data from API");
+      console.log("Fetching profile data from API for user ID:", userId);
       
       const response = await fetch(`/api/profile/${userId}`);
-      
-      if (!response.ok) {
-        throw new Error('Failed to fetch profile');
-      }
-      
       const data = await response.json();
       
-      // Only update state if we got valid data
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to fetch profile');
+      }
+      
+      console.log("Profile data received:", data);
+      
+      // If we got valid data (not null and no error property)
       if (data && !data.error) {
         setProfileData(data);
         setLastFetchTime(now);
-      } else if (!data) {
+      } else if (data === null) {
         // Handle case where profile doesn't exist yet
+        console.log("Profile doesn't exist yet");
+        setProfileData(null);
+      } else if (data.error) {
+        // Handle error in the response data
+        throw new Error(data.error);
+      } else {
+        console.log("No valid data received from API");
         setProfileData(null);
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An unknown error occurred');
+      const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
+      setError(errorMessage);
       console.error('Error fetching profile:', err);
     } finally {
       setIsLoading(false);
@@ -78,10 +87,11 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
     try {
       setIsLoading(true);
       
-      // Ensure links array is properly included
+      // Ensure required arrays are properly included
       const dataToSend = {
         ...data,
-        links: data.links || [],
+        links: data.links || profileData?.links || [],
+        socials: data.socials || profileData?.socials || [],
       };
       
       console.log("Sending profile data to API:", dataToSend);
@@ -92,10 +102,14 @@ export const ProfileProvider = ({ children }: { children: ReactNode }) => {
         body: JSON.stringify(dataToSend),
       });
 
+      const responseData = await response.json();
+      
       if (!response.ok) {
-        throw new Error('Failed to update profile');
+        throw new Error(responseData.error || 'Failed to update profile');
       }
 
+      console.log("Profile update response:", responseData);
+      
       // Refetch profile data to ensure we have the latest
       await fetchProfile(true);
       return true;

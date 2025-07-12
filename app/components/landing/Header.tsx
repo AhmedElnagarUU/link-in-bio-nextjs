@@ -1,11 +1,13 @@
 "use client";
+import { RegisterLink, LoginLink } from "@kinde-oss/kinde-auth-nextjs/components";
 import { Button } from "@/components/ui/button";
 import { Link2, User, LogOut } from "lucide-react";
 import Link from 'next/link';
-import { useSession, signOut } from 'next-auth/react';
+// import { useSession, signOut } from 'next-auth/react';
 
 export const Header = () => {
-  const { data: session } = useSession();
+  // const { data: session } = useSession();
+  // console.log(session)
 
   return (
     <header className="sticky top-0 z-50 w-full border-red-400/20 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -30,28 +32,28 @@ export const Header = () => {
           </a>
         </nav>
         <div className="flex items-center space-x-4 flex-1 justify-end">
-          {session ? (
+          {false ? (
             <>
               <Link href="/profile" className="flex items-center space-x-2 px-3 py-1.5 rounded-full bg-[linear-gradient(135deg,#ff9a56_0%,#ff6b9d_100%)] hover:opacity-90 transition-all text-white">
                 <User className="h-5 w-5" />
-                <span>{session.user?.name}</span>
+                <span>i delete thid </span>
               </Link>
-              <Button variant="logout" size="sm" onClick={() => signOut()}>
+              <Button variant="logout" size="sm" onClick={() => console.log(`thid will by logout`)}>
                 <LogOut className="h-5 w-5" />
               </Button>
             </>
           ) : (
             <>
-              <Link href="/login">
+              <LoginLink>
                 <Button variant="ghost" size="sm">
                   Sign In
                 </Button>
-              </Link>
-              <Link href="/register">
+              </LoginLink>
+              <RegisterLink>
                 <Button size="sm" className="bg-[linear-gradient(135deg,#ff9a56_0%,#ff6b9d_100%)] text-white border-0 hover:opacity-90 transition-opacity">
                   Get Started
                 </Button>
-              </Link>
+              </RegisterLink>
             </>
           )}
         </div>

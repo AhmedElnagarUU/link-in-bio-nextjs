@@ -5,6 +5,7 @@ if (!process.env.MONGODB_URI) {
 }
 
 const MONGODB_URI = process.env.MONGODB_URI;
+console.log('mongodb uri' , MONGODB_URI);
 
 let cached = global.mongoose;
 

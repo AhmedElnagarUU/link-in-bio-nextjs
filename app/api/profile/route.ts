@@ -3,7 +3,7 @@ import connectDB from '@/lib/mongoose';
 import User, { IUser } from '../../model/User';
 import UserProfile, { IUserProfile } from '../../model/UserProfile';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '@/api/auth/[...nextauth]/route';
+import { authOptions } from '@/api/auth/[kindauth]/route';
 import mongoose from 'mongoose';
 
 export async function POST(request: Request) {
