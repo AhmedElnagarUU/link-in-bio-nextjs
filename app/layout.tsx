@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "HyparBIO - Your Ultimate Link in Bio Solution",
+  title: "Lynquer - Your Ultimate Link in Bio Solution",
   description: "Create a beautiful, customizable link in bio page with HyparBIO. Perfect for creators, entrepreneurs, and influencers.",
 };
 

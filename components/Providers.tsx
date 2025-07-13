@@ -2,7 +2,7 @@
 
 
 import { Toaster } from "sonner";
-import { ProfileProvider } from "@/contexts/ProfileContext";
+import { ProfileProvider } from "../../contexts/ProfileContext";
 
 export default function Providers({ children }: { children: React.ReactNode }) {
   return (

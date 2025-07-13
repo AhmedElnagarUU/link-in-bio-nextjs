@@ -1,11 +1,15 @@
 "use client";
-import { RegisterLink, LoginLink } from "@kinde-oss/kinde-auth-nextjs/components";
+import { RegisterLink, LoginLink , LogoutLink} from "@kinde-oss/kinde-auth-nextjs/components";
+import { useKindeBrowserClient } from "@kinde-oss/kinde-auth-nextjs";
 import { Button } from "@/components/ui/button";
 import { Link2, User, LogOut } from "lucide-react";
 import Link from 'next/link';
 // import { useSession, signOut } from 'next-auth/react';
 
 export const Header = () => {
+  const {user , isAuthenticated}=useKindeBrowserClient();
+  console.log(`this is the user from landing page  ${user}`);
+  console.log(isAuthenticated);
   // const { data: session } = useSession();
   // console.log(session)
 
@@ -32,15 +36,17 @@ export const Header = () => {
           </a>
         </nav>
         <div className="flex items-center space-x-4 flex-1 justify-end">
-          {false ? (
+          {isAuthenticated ? (
             <>
               <Link href="/profile" className="flex items-center space-x-2 px-3 py-1.5 rounded-full bg-[linear-gradient(135deg,#ff9a56_0%,#ff6b9d_100%)] hover:opacity-90 transition-all text-white">
                 <User className="h-5 w-5" />
                 <span>i delete thid </span>
               </Link>
+              <LogoutLink>
               <Button variant="logout" size="sm" onClick={() => console.log(`thid will by logout`)}>
                 <LogOut className="h-5 w-5" />
               </Button>
+              </LogoutLink>
             </>
           ) : (
             <>

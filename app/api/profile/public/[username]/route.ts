@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import connectDB from '@/lib/mongoose';
-import User, { IUser } from '../../../../model/User';
-import UserProfile, { IUserProfile } from '../../../../model/UserProfile';
+import User, { IUser } from '../../../../../model/User';
+import UserProfile, { IUserProfile } from '../../../../../model/UserProfile';
 
 // GET public profile by username
 export async function GET(

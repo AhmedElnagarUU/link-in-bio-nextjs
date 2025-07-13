@@ -10,7 +10,7 @@ export const Footer = () => {
               <div className="w-8 h-8 rounded-lg bg-[linear-gradient(135deg,#ff9a56_0%,#ff6b9d_100%)] flex items-center justify-center">
                 <Link2 className="w-4 h-4 text-white" />
               </div>
-              <span className="text-xl font-bold bg-[linear-gradient(135deg,#ff9a56_0%,#ff6b9d_100%)] bg-clip-text text-transparent">HyparBIO</span>
+              <span className="text-xl font-bold bg-[linear-gradient(135deg,#ff9a56_0%,#ff6b9d_100%)] bg-clip-text text-transparent">Lynqur</span>
             </div>
             <p className="text-slate-500 text-sm">
               The simplest way to share everything you create, curate, and sell from your Instagram, TikTok, Twitter, YouTube, and other social media profiles.
@@ -49,7 +49,7 @@ export const Footer = () => {
         </div>
         
         <div className="border-t border-slate-200/30 mt-8 pt-8 text-center text-sm text-slate-600">
-          <p>&copy; 2025 HyparBIO. All rights reserved. Made with ❤️ for creators worldwide.</p>
+          <p>&copy; 2025 Lynqur. All rights reserved. Made with ❤️ for creators worldwide.</p>
         </div>
       </div>
     </footer>
